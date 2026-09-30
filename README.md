@@ -1,7 +1,7 @@
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/profile-dark.svg" />
-  <source media="(prefers-color-scheme: light)" srcset="assets/profile-light.svg" />
-  <img alt="Terminal card for Mohith Dodapaneni Balaraju" src="assets/profile-dark.svg" />
+  <source media="(prefers-color-scheme: dark)" srcset="assets/profile-dark.svg?v=3" />
+  <source media="(prefers-color-scheme: light)" srcset="assets/profile-light.svg?v=3" />
+  <img alt="Terminal card for Mohith Dodapaneni Balaraju" src="assets/profile-dark.svg?v=3" />
 </picture>
 
 [dodapanenimohith2003@gmail.com](mailto:dodapanenimohith2003@gmail.com) · [LinkedIn](https://www.linkedin.com/in/dodapaneni-balaraju-mohith/)
