@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Build the terminal profile cards from a portrait photo."""
 
+import base64
+import io
 from collections import deque
 from pathlib import Path
 
@@ -18,6 +20,11 @@ FONT_PATH = "/System/Library/Fonts/Menlo.ttc"
 WIDTH = 1260
 HEIGHT = 680
 RAMP = " .:-=+*#%@"
+
+LINKS = {
+    "email.personal": "mailto:dodapanenimohith2003@gmail.com",
+    "linkedin": "https://www.linkedin.com/in/dodapaneni-balaraju-mohith/",
+}
 
 SECTIONS = [
     (
@@ -306,36 +313,16 @@ def xml_text(value):
     return value.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
-def portrait_svg(grid, x, y):
-    size = 13
-    line_h = 16
-    lines = []
-    for index, row in enumerate(grid):
-        runs = []
-        glyph_run = ""
-        color = None
-        for glyph, glyph_color in row:
-            if glyph_color != color and glyph_run:
-                runs.append(f'<tspan fill="{color}">{xml_text(glyph_run)}</tspan>')
-                glyph_run = ""
-            color = glyph_color
-            glyph_run += glyph
-        if glyph_run:
-            runs.append(f'<tspan fill="{color}">{xml_text(glyph_run)}</tspan>')
-        baseline = y + index * line_h
-        lines.append(f'<text x="{x}" y="{baseline}" font-size="{size}">{"".join(runs)}</text>')
-    height = len(grid) * line_h
-    width = int(ImageFont.truetype(FONT_PATH, size).getlength("M") * len(grid[0])) + 8
-    return "\n".join(lines), width, height
-
-
-def render_svg(theme_name, grid):
+def render_svg(theme_name, portrait):
     theme = THEMES[theme_name]
     font = ImageFont.truetype(FONT_PATH, 20)
     labels = [label for _, fields in SECTIONS for label, _ in fields if label]
     values = [value for _, fields in SECTIONS for _, value in fields]
     text_width = int(max(font.getlength(label) for label in labels) + 64 + max(font.getlength(value) for value in values))
-    portrait_markup, portrait_w, portrait_h = portrait_svg(grid, 20, 78)
+    portrait_w, portrait_h = portrait.size
+    buffer = io.BytesIO()
+    portrait.save(buffer, format="PNG")
+    encoded = base64.b64encode(buffer.getvalue()).decode("ascii")
     left = 36 + portrait_w + 28
     width = left + text_width + 28
     row_h = 32
@@ -350,7 +337,7 @@ def render_svg(theme_name, grid):
     mint = hex_color(theme["mint"])
     parts = [
         '<?xml version="1.0" encoding="UTF-8"?>',
-        f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="20">',
+        f'<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="{width}" height="{height}" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="20">',
         f'<rect width="{width}" height="{height}" rx="16" fill="{hex_color(theme["card"])}"/>',
         f'<rect width="{width}" height="48" fill="{hex_color(theme["bar"])}"/>',
         f'<line x1="0" y1="48" x2="{width}" y2="48" stroke="{hex_color(theme["border"])}"/>',
@@ -360,7 +347,10 @@ def render_svg(theme_name, grid):
     parts.append(
         f'<text x="{width / 2}" y="29" fill="{dot_color}" font-size="15" text-anchor="middle">mohith@github — zsh</text>'
     )
-    parts.append(portrait_markup)
+    portrait_y = 64 + max(0, (height - 88 - portrait_h) // 2)
+    parts.append(
+        f'<image x="20" y="{portrait_y}" width="{portrait_w}" height="{portrait_h}" href="data:image/png;base64,{encoded}" xlink:href="data:image/png;base64,{encoded}"/>'
+    )
     parts.append(f'<line x1="{left - 18}" y1="64" x2="{left - 18}" y2="{height - 24}" stroke="{hex_color(theme["border"])}"/>')
     y = 78 + max(0, (height - 90 - block_h) // 2)
     parts.append(f'<text x="{left}" y="{y}" fill="{mint}" font-size="30">mohith@github</text>')
@@ -386,9 +376,15 @@ def render_svg(theme_name, grid):
             parts.append(
                 f'<text x="{left}" y="{y}" font-size="20">{label_svg}<tspan fill="{dot_color}">{"." * count}</tspan></text>'
             )
-            parts.append(
-                f'<text x="{right}" y="{y}" font-size="20" text-anchor="end" fill="{value_color}">{xml_text(value)}</text>'
+            decoration = ' text-decoration="underline"' if label in LINKS else ""
+            value_text = (
+                f'<text x="{right}" y="{y}" font-size="20" text-anchor="end" fill="{value_color}"'
+                f'{decoration}>{xml_text(value)}</text>'
             )
+            if label in LINKS:
+                parts.append(f'<a href="{LINKS[label]}" target="_blank">{value_text}</a>')
+            else:
+                parts.append(value_text)
             y += row_h
     parts.append("</svg>")
     return "\n".join(parts), (width, height)
@@ -396,11 +392,10 @@ def render_svg(theme_name, grid):
 
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
-    grid = portrait_cells()
     portrait = render_portrait()
     for name in THEMES:
         render_card(name, portrait).save(OUT / f"profile-{name}.png", optimize=True)
-        svg, size = render_svg(name, grid)
+        svg, size = render_svg(name, portrait)
         path = OUT / f"profile-{name}.svg"
         path.write_text(svg)
         print(path, size)

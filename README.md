@@ -4,6 +4,8 @@
   <img alt="Terminal card for Mohith Dodapaneni Balaraju" src="assets/profile-dark.svg" />
 </picture>
 
+[dodapanenimohith2003@gmail.com](mailto:dodapanenimohith2003@gmail.com) · [LinkedIn](https://www.linkedin.com/in/dodapaneni-balaraju-mohith/)
+
 <br>
 
 <a href="https://github.com/MDB-2003?tab=repositories">
