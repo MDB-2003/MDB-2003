@@ -37,7 +37,7 @@ SECTIONS = [
     (
         "Education",
         [
-            ("Houston", "Master's in Engineering Data Science and AI"),
+            ("University Of Houston", "Master's in Engineering Data Science and AI"),
             ("", "2025 — current"),
             ("GITAM", "Bachelor's in Computer Science and Engineering"),
             ("", "2021 — 2025"),
