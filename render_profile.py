@@ -39,7 +39,7 @@ SECTIONS = [
         [
             ("University Of Houston", "Master's in Engineering Data Science and AI"),
             ("", "2025 — current"),
-            ("GITAM", "Bachelor's in Computer Science and Engineering"),
+            ("GITAM University", "Bachelor's in Computer Science and Engineering"),
             ("", "2021 — 2025"),
         ],
     ),
@@ -396,7 +396,7 @@ def main():
     for name in THEMES:
         render_card(name, portrait).save(OUT / f"profile-{name}.png", optimize=True)
         svg, size = render_svg(name, portrait)
-        path = OUT / f"profile-card-{name}.svg"
+        path = OUT / f"card-{name}.svg"
         path.write_text(svg)
         print(path, size)
 
