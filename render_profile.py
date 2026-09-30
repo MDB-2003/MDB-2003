@@ -396,7 +396,7 @@ def main():
     for name in THEMES:
         render_card(name, portrait).save(OUT / f"profile-{name}.png", optimize=True)
         svg, size = render_svg(name, portrait)
-        path = OUT / f"profile-{name}.svg"
+        path = OUT / f"profile-card-{name}.svg"
         path.write_text(svg)
         print(path, size)
 
